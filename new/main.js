@@ -74,23 +74,25 @@ export function main(world) {
   );
   stadium.addChase(chase);
 
-  const input = document.createElement("input");
-  input.type = "file";
-  input.multiple = true;
-  input.style.position = "absolute";
-  input.style.top = "50px";
-  input.style.left = "10px";
-  input.onchange = async (e) => {
-      // @ts-ignore
-      const files = e.target.files;
-      let json, bin;
-      for (let f of files) {
-          if (f.name.endsWith(".json")) json = f;
-          if (f.name.endsWith(".bin")) bin = f;
-      }
-      if (json && bin) await gk.loadBrain([json, bin]);
+  const btnSimple = document.createElement("button");
+  btnSimple.textContent = "Simple GK";
+  btnSimple.style.position = "absolute";
+  btnSimple.style.top = "50px";
+  btnSimple.style.left = "10px";
+  btnSimple.onclick = () => {
+    gk.loadPresetBrain("simple").catch(err => console.error(err));
   };
-  document.body.appendChild(input);
+  document.body.appendChild(btnSimple);
+
+  const btnHard = document.createElement("button");
+  btnHard.textContent = "Hard GK";
+  btnHard.style.position = "absolute";
+  btnHard.style.top = "50px";
+  btnHard.style.left = "100px";
+  btnHard.onclick = () => {
+    gk.loadPresetBrain("hard").catch(err => console.error(err));
+  };
+  document.body.appendChild(btnHard);
 
 }
 

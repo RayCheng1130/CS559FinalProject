@@ -65,6 +65,16 @@ export class goalKeeper extends Human {
         console.log("Brain loaded! Mode set to PLAY.");
     }
 
+    async loadPresetBrain(level) {
+        const url = `./model/${level}.json`;   // e.g. "./model/hard.json"
+        console.log("Loading GK model from", url);
+        this._model = await tf.loadLayersModel(url);
+        this._model.compile({ optimizer: tf.train.adam(0.001), loss: "meanSquaredError" });
+        this._epsilon = 0.0;
+        this._mode = "play";
+        console.log(`Preset GK model "${level}" loaded. Mode = PLAY`);
+    }
+
     setBall(ball, stadiumScale, stadiumX, stadiumZ) {
         this._ballRef = { ball, stadiumScale, stadiumX, stadiumZ };
     }
