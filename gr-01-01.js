@@ -1,7 +1,6 @@
 /*jshint esversion: 6 */
 // @ts-check
 import { GrWorld } from "./libs/CS559-Framework/GrWorld.js";
-import { WorldUI } from "./libs/CS559-Framework/WorldUI.js";
 
 /**
  * Helper: get current mode from URL (?mode=game / ?mode=train)
