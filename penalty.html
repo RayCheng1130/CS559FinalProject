@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Penalty Shootout</title>
+
+    <style>
+        body { margin: 0; overflow: hidden; background: white; }
+        #game-container { width: 100vw; height: 100vh; }
+    </style>
+    
+</head>
+
+<body>
+    <div id="game-container"></div>
+    <style>
+        /* FULLSCREEN OVERLAY */
+    #fifa-ui {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        backdrop-filter: blur(12px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 20;
+        opacity: 1;
+        transition: opacity 0.8s ease;
+    }
+
+    /* CENTER PANEL */
+    .fifa-panel {
+        background: rgba(20, 30, 60, 0.8);
+        padding: 50px 70px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    /* TITLE */
+    .fifa-title {
+        font-family: "Arial Black", sans-serif;
+        font-size: 48px;
+        color: gold;
+        letter-spacing: 3px;
+        margin-bottom: 40px;
+        text-shadow: 0 0 10px rgba(255,215,0,0.7);
+    }
+
+    /* INPUT BOX */
+    #team-name {
+        width: 280px;
+        padding: 14px 18px;
+        border-radius: 8px;
+        border: none;
+        outline: none;
+        font-size: 18px;
+        margin-bottom: 25px;
+        background: rgba(255,255,255,0.85);
+        color: #222;
+    }
+
+    /* GOLD+BLUE BUTTON */
+    .fifa-btn {
+        width: 280px;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        font-size: 20px;
+        font-weight: bold;
+        color: white;
+        cursor: pointer;
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        border: 2px solid gold;
+        box-shadow: 0 0 10px rgba(255,215,0,0.5);
+        transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .fifa-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(255,215,0,0.9);
+    }
+
+    /* When UI fades out */
+    #fifa-ui.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+    #score-hud {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        font-family: "Arial Black", sans-serif;
+        font-size: 28px;
+        color: white;
+        background: rgba(0,0,0,0.5);
+        padding: 12px 20px;
+        border-radius: 12px;
+        z-index: 50;
+        pointer-events: none;
+        opacity: 0;  /* start hidden */
+        transition: opacity 0.5s ease;
+    }
+
+    .score-team {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .score-icons {
+        display: flex;
+        gap: 5px;
+    }
+
+    .result-overlay {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        padding: 18px 36px;
+        background: rgba(0,0,0,0.65);
+        color: #fff;
+        font-size: 96px;
+        font-weight: 800;
+        border-radius: 10px;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        text-align: center;
+        letter-spacing: 6px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    #goal-overlay {
+        background: linear-gradient(90deg, rgba(0,180,0,0.95), rgba(0,120,0,0.95));
+        color: #fff;
+        text-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    }
+
+    #miss-overlay {
+        background: linear-gradient(90deg, rgba(180,0,0,0.95), rgba(120,0,0,0.95));
+        color: #fff;
+        text-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    }
+    #you-win-banner {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;                /* wide */
+        padding: 20px 0;           /* not tall */
+        background: rgba(0, 255, 0, 0.35); /* light green, semi-transparent */
+        color: white;
+        font-family: "Arial Black", sans-serif;
+        font-size: 48px;
+        text-align: center;
+        border-radius: 0 0 20px 20px;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+        z-index: 99999;
+        opacity: 0;
+        transition: opacity 0.6s ease;
+        pointer-events: none;      /* UI won’t block clicks */
+    }
+    #you-win-banner.show {
+        opacity: 1;
+    }
+
+
+    </style>
+
+    <!-- UI overlay -->
+    <div id="fifa-ui">
+        <div class="fifa-panel">
+
+            <div class="fifa-header">
+                <img class="fifa-icon" src="data:image/svg+xml;utf8,
+                <svg width='64' height='64' viewBox='0 0 24 24' fill='gold' xmlns='http://www.w3.org/2000/svg'>
+                    <path d='M12 2L2 7v5c0 5.25 3.438 10.688 10 12 6.563-1.313 10-6.75 10-12V7l-10-5z'/>
+                </svg>" />
+                <h1 class="fifa-title">Penalty Shootout</h1>
+            </div>
+
+            <div class="team-container">
+                <img class="team-icon" src="data:image/svg+xml;utf8,
+                <svg width='100' height='100' viewBox='0 0 24 24' fill='white' xmlns='http://www.w3.org/2000/svg'>
+                    <circle cx='12' cy='8' r='4'/>
+                    <path d='M4 22c0-4 4-7 8-7s8 3 8 7'/>
+                </svg>"/>
+            </div>
+
+            <input id="team-name" type="text" placeholder="Enter Team Name" />
+
+            <button id="start-button" class="fifa-btn">
+                Start Match
+            </button>
+            <button id="skip-button" class="fifa-btn">
+                Skip Intro
+            </button>
+
+        </div>
+    </div>
+    <!-- Score HUD -->
+    <div id="score-hud">
+        <div class="score-team" id="team-score-row">
+            <span id="team-name-display">TEAM</span>
+            <div class="score-icons"></div>
+        </div>
+        <div class="score-team" id="opponent-score-row">
+            <span id="opponent-name-display">Computer FC</span>
+            <div class="score-icons"></div>
+        </div>
+    </div>
+
+    <div id="countdown" 
+        style="position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);
+                font-size:120px;color:white;font-family:'Arial Black';
+                text-shadow:0 0 20px black;z-index:70;opacity:0;transition:opacity 0.2s;">
+    </div>
+    <div id="goal-overlay" class="result-overlay" aria-hidden="true">GOAL</div>
+    <div id="miss-overlay" class="result-overlay" aria-hidden="true">MISS</div>
+    <div id="you-win-banner">YOU WIN!</div>
+
+
+    <div id="game-container"></div>
+    
+
+
+    <!-- Load main.js -->
+    <script type="module">
+        import { main } from "./new/main.js";
+        main();
+    </script>
+</body>
+</html>

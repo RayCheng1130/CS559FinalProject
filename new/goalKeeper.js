@@ -33,7 +33,7 @@ export class goalKeeper extends Human {
         
         // Hyperparameters
         this._gamma = 0.95;          
-        this._epsilon = (this._mode === "train" ? 1.0 : 0.01); 
+        this._epsilon = this._mode === "train" ? 1.0 : 0.01; 
         this._epsilonMin = 0.05;
         this._epsilonDecay = 0.998;  // smaller-> train faster
 
@@ -50,7 +50,7 @@ export class goalKeeper extends Human {
      * Save the trained model to Downloads
      */
     async saveBrain() {
-        await this._model.save('downloads://gk-brain'); // specify the name of the saved model 
+        await this._model.save('downloads://gk-brain');
         console.log("Brain saved to downloads!");
     }
 
@@ -65,14 +65,12 @@ export class goalKeeper extends Human {
         console.log("Brain loaded! Mode set to PLAY.");
     }
 
-    async loadPresetBrain(level) {
-        const url = `./model/${level}.json`;   // e.g. "./model/hard.json"
-        console.log("Loading GK model from", url);
+    async loadBrainFromUrl(url) {
         this._model = await tf.loadLayersModel(url);
         this._model.compile({ optimizer: tf.train.adam(0.001), loss: "meanSquaredError" });
         this._epsilon = 0.0;
         this._mode = "play";
-        console.log(`Preset GK model "${level}" loaded. Mode = PLAY`);
+        console.log("Brain loaded from URL:", url);
     }
 
     setBall(ball, stadiumScale, stadiumX, stadiumZ) {
@@ -241,5 +239,9 @@ export class goalKeeper extends Human {
 
         // Train periodically
         this._replay();
+    }
+
+    update(delta) {
+        this.stepWorld(delta);
     }
 }

@@ -1,12 +1,10 @@
 import * as T from "../libs/CS559-Three/build/three.module.js";
 import { GrObject } from "../libs/CS559-Framework/GrObject.js";
 
-export class OldTrafford extends GrObject {
+export class OldTrafford{
     constructor(params = {}) {
         // The main stadium group
         const otGroup = new T.Group();
-        super("OldTrafford", otGroup);
-
         const loader = new T.TextureLoader();
 
         // ---------- FIELD ----------
@@ -141,10 +139,10 @@ export class OldTrafford extends GrObject {
 
             const goal = new T.Group();
 
-            const POST_D = 0.6;
-            const GOAL_W = 20.32;
-            const GOAL_H = 10.55;
-            const GOAL_D = 6.0;
+            const POST_D = 0.3;
+            const GOAL_W = 12;
+            const GOAL_H = 6;
+            const GOAL_D = 2;
 
             const mat = new T.MeshStandardMaterial({
                 color: "white",
@@ -191,14 +189,14 @@ export class OldTrafford extends GrObject {
             goal.add(bottomRightBar);
 
             // Bar connecting bottom back to left post
-            const backToLeftBarGeo = new T.CylinderGeometry(POST_D/2, POST_D/2, Math.sqrt(GOAL_D*GOAL_D + (GOAL_W/2)*(GOAL_W/2)), 16);
+            const backToLeftBarGeo = new T.CylinderGeometry(POST_D/2, POST_D/2, Math.sqrt(GOAL_D*GOAL_D + GOAL_H*GOAL_H), 16);
             const backToLeftBar = new T.Mesh(backToLeftBarGeo, mat);
             backToLeftBar.rotation.z = -Math.atan(GOAL_D / GOAL_H);
             backToLeftBar.position.set(-GOAL_D/2, GOAL_H/2, GOAL_W/2);
             goal.add(backToLeftBar);
 
             // Bar connecting bottom back to right post
-            const backToRightBarGeo = new T.CylinderGeometry(POST_D/2, POST_D/2, Math.sqrt(GOAL_D*GOAL_D + (GOAL_W/2)*(GOAL_W/2)), 16);
+            const backToRightBarGeo = new T.CylinderGeometry(POST_D/2, POST_D/2, Math.sqrt(GOAL_D*GOAL_D + GOAL_H*GOAL_H), 16);
             const backToRightBar = new T.Mesh(backToRightBarGeo, mat);
             backToRightBar.rotation.z = -Math.atan(GOAL_D / GOAL_H);
             backToRightBar.position.set(-GOAL_D/2, GOAL_H/2, -GOAL_W/2);
@@ -335,8 +333,7 @@ export class OldTrafford extends GrObject {
             inst.instanceMatrix.needsUpdate = true;
             return inst;
         }
-
-         // ---------- Crowd Helper ----------
+        // ---------- Crowd Helper ----------
         function createInstancedCrowd(rowInfos, crowdGeo) {
             if (!rowInfos || rowInfos.length === 0) return null;
 
@@ -392,6 +389,7 @@ export class OldTrafford extends GrObject {
 
         crowdGeo.setAttribute("position", new T.BufferAttribute(arr, 3));
         crowdGeo.computeVertexNormals();
+
 
         // ---------- North/South STANDS ----------
         function buildNSStands() {
@@ -501,7 +499,6 @@ export class OldTrafford extends GrObject {
                 // create instanced seats for this side (single InstancedMesh)
                 const instSeats = createInstancedSeats(rowInfos, seatGeoNS, seatMat);
                 if (instSeats) side.add(instSeats);
-
                 const instCrowd = createInstancedCrowd(rowInfos, crowdGeo);
                 if (instCrowd) side.add(instCrowd);
 
@@ -615,6 +612,8 @@ export class OldTrafford extends GrObject {
                 // create instanced seats for this side
                 const instSeats = createInstancedSeats(rowInfos, seatGeoWE, seatMat);
                 if (instSeats) side.add(instSeats);
+                const instCrowd = createInstancedCrowd(rowInfos, crowdGeo);
+                if (instCrowd) side.add(instCrowd);
 
                 // supports along outer edge (arrayed along z)
                 const supportSpacing = 6;
@@ -1436,6 +1435,7 @@ export class OldTrafford extends GrObject {
         }
     }
         // ---------- POSITION ----------
+        this.group = otGroup;
         otGroup.position.set(params.x || 0, params.y || 0, params.z || 0);
         otGroup.scale.set(params.scale || 1, params.scale || 1, params.scale || 1);
         this.rideable = goalLeft || false;
@@ -1447,7 +1447,6 @@ export class OldTrafford extends GrObject {
         // player reference (set later from main.js)
         this._player = null;
         this._goalKeeper = null;
-        this._chase =null;
 
 
     }
@@ -1457,9 +1456,6 @@ export class OldTrafford extends GrObject {
     }
     addGoalKeeper(gk) {
         this._goalKeeper = gk;
-    }
-    addChase(chase) {
-        this._chase = chase;
     }
 
     stepWorld(delta, timeOfDay) {
@@ -1600,8 +1596,6 @@ if (this._ball && this._ballVel) {
 
         // collide with goalkeeper (slightly bigger radius, maybe a bit softer kick)
         collideWithChar(this._goalKeeper, 6.0, 35);
-
-        collideWithChar(this._chase, 2.0, 30);
     }
 
 
