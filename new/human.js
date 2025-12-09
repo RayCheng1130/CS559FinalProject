@@ -2,11 +2,9 @@
 import * as T from "../libs/CS559-Three/build/three.module.js";
 import { GrObject } from "../libs/CS559-Framework/GrObject.js";
 
-export class Human extends GrObject {
+export class Human{
     constructor(params = {}) {
         const human = new T.Group();
-        const label = params.label || "Human";
-        super(label, human);
 
         this._root = human;
 
@@ -136,7 +134,7 @@ export class Human extends GrObject {
             left: false,
             right: false
         };
-
+        this.group = human;
         this._moveSpeed = params.moveSpeed || 10;   // units / second
         this._turnSpeed = params.turnSpeed || 1.0;  // radians / second
         this._dirAngle = 0;                         // facing direction around Y
