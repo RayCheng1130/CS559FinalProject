@@ -14,6 +14,7 @@
 import { OldTrafford } from "./Old_Trafford.js";
 import { Human } from "./human.js";
 import { goalKeeper } from "./goalKeeper.js"
+import { BallChaser } from "./ballChaser.js";
 
 /********************************************************************** */
 /** EXAMPLES - student should not use this! It is just for reference    */
@@ -21,7 +22,7 @@ import { goalKeeper } from "./goalKeeper.js"
 /***/
 export function main(world) {
   // Add Old Trafford Stadium model
-  let stadium = new OldTrafford({ x: 0, y: 0.5, z: 0, scale: 2, ballSpeed: 20, friction: 0.5 });
+  let stadium = new OldTrafford({ x: 0, y: 0.5, z: 0, scale: 2, ballSpeed: 0, friction: 0.5 });
   // frction: 0: smooth, 1: rough
   world.add(stadium);
 
@@ -46,6 +47,16 @@ export function main(world) {
   });
   world.add(gk);
 
+  const chase = new BallChaser({
+    x: 20,
+    y: 1,
+    z: 0,
+    scale: 1.5,
+    moveSpeed: 5,
+    label: "Chaser"
+  });
+  world.add(chase);
+
   // Link GK with the ball (needed for TF input)
   gk.setBall(
       stadium._ball, 
@@ -54,6 +65,15 @@ export function main(world) {
       stadium._stadiumZ
   );
   stadium.addGoalKeeper(gk);
+
+  chase.setBall(
+    stadium._ball,
+    stadium._stadiumScale,
+    stadium._stadiumX,
+    stadium._stadiumZ
+  );
+  stadium.addChase(chase);
+
   const input = document.createElement("input");
   input.type = "file";
   input.multiple = true;

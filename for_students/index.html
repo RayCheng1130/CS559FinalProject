@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CS559 Goalkeeper DQN Demo</title>
+
+    <!-- TFJS for the DQN GK -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+
+    <!-- Your CS559 CSS (adjust path if needed) -->
+    <link rel="stylesheet" href="./libs/CS559/style559.css" />
+
+    <style>
+      #topbar {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-family: sans-serif;
+        font-size: 14px;
+      }
+      #topbar button {
+        margin-left: 4px;
+        margin-right: 4px;
+        cursor: pointer;
+      }
+      #mode-status {
+        margin-left: 10px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Simple mode switch UI -->
+    <div id="topbar">
+      Mode:
+      <button id="btn-game" type="button">Game</button>
+      <button id="btn-train" type="button">Training Gym</button>
+      <span id="mode-status"></span>
+    </div>
+
+    <!-- Graphics Town canvas container -->
+    <div id="div1"></div>
+
+    <!-- Import map for three.js -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./libs/CS559-Three/build/three.module.js"
+        }
+      }
+    </script>
+
+    <!-- Main loader for world + mode switching -->
+    <script src="./gr-01-01.js" type="module"></script>
+  </body>
+</html>

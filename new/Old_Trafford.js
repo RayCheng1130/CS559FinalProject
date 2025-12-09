@@ -336,6 +336,63 @@ export class OldTrafford extends GrObject {
             return inst;
         }
 
+         // ---------- Crowd Helper ----------
+        function createInstancedCrowd(rowInfos, crowdGeo) {
+            if (!rowInfos || rowInfos.length === 0) return null;
+
+            const mat = new T.MeshStandardMaterial({
+                roughness: 0.8,
+                metalness: 0.1
+            });
+
+            const inst = new T.InstancedMesh(crowdGeo, mat, rowInfos.length);
+            inst.instanceMatrix.setUsage(T.DynamicDrawUsage);
+
+            const dummy = new T.Object3D();
+
+            for (let i = 0; i < rowInfos.length; i++) {
+                const r = rowInfos[i];
+                if (r.orient === "x") {
+                    dummy.position.set(r.start, r.y + 0.1, r.z);
+                    dummy.rotation.set(0, r.rotY || 0, 0);
+                } else {
+                    dummy.position.set(r.x, r.y + 0.1, r.start);
+                    dummy.rotation.set(0, r.rotY || 0, 0);
+                }
+                dummy.scale.set(0.85, 0.85, 0.85);
+                dummy.updateMatrix();
+                inst.setMatrixAt(i, dummy.matrix);
+
+                // Random per-person color
+                inst.setColorAt(i, new T.Color(Math.random(), Math.random(), Math.random()));
+            }
+
+            inst.instanceMatrix.needsUpdate = true;
+            inst.instanceColor.needsUpdate = true;
+
+            return inst;
+        }
+
+
+
+        // ---------- Person Geometry ----------
+        const body = new T.CapsuleGeometry(0.3, 0.5, 4, 6);
+        body.translate(0, 0.45, 0);
+        const head = new T.SphereGeometry(0.2, 12, 10);
+        head.translate(0, 1.2, 0);
+        const crowdGeo = new T.BufferGeometry();
+        crowdGeo.copy(body);
+
+        const posA = body.getAttribute("position");
+        const posB = head.getAttribute("position");
+        const arr = new Float32Array(posA.count * 3 + posB.count * 3);
+
+        arr.set(posA.array, 0);
+        arr.set(posB.array, posA.array.length);
+
+        crowdGeo.setAttribute("position", new T.BufferAttribute(arr, 3));
+        crowdGeo.computeVertexNormals();
+
         // ---------- North/South STANDS ----------
         function buildNSStands() {
             const standsGroup = new T.Group();
@@ -444,6 +501,9 @@ export class OldTrafford extends GrObject {
                 // create instanced seats for this side (single InstancedMesh)
                 const instSeats = createInstancedSeats(rowInfos, seatGeoNS, seatMat);
                 if (instSeats) side.add(instSeats);
+
+                const instCrowd = createInstancedCrowd(rowInfos, crowdGeo);
+                if (instCrowd) side.add(instCrowd);
 
                 // supports along outer edge
                 const supportSpacing = 6;
@@ -1387,6 +1447,7 @@ export class OldTrafford extends GrObject {
         // player reference (set later from main.js)
         this._player = null;
         this._goalKeeper = null;
+        this._chase =null;
 
 
     }
@@ -1396,6 +1457,9 @@ export class OldTrafford extends GrObject {
     }
     addGoalKeeper(gk) {
         this._goalKeeper = gk;
+    }
+    addChase(chase) {
+        this._chase = chase;
     }
 
     stepWorld(delta, timeOfDay) {
@@ -1536,6 +1600,8 @@ if (this._ball && this._ballVel) {
 
         // collide with goalkeeper (slightly bigger radius, maybe a bit softer kick)
         collideWithChar(this._goalKeeper, 6.0, 35);
+
+        collideWithChar(this._chase, 2.0, 30);
     }
 
 
