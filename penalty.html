@@ -13,6 +13,29 @@
 </head>
 
 <body>
+    <button id="backToMenu" type="button" onclick="goBackToMenu()">← Back to Menu</button>
+
+<script>
+  function goBackToMenu() {
+    // If user navigated here from your index page, this returns without reloading.
+    if (window.history.length > 1) window.history.back();
+    else window.location.href = "../index.html"; // adjust path per page
+  }
+</script>
+
+<style>
+  #backToMenu{
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 9999;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+</style>
     <div id="game-container"></div>
     <style>
         /* FULLSCREEN OVERLAY */
